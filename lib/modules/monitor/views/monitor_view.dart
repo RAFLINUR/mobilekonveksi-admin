@@ -1,149 +1,277 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import '../controllers/monitor_controller.dart';
 
-class MonitorView extends GetView<MonitorController> {
+class MonitorView extends StatelessWidget {
+  MonitorView({super.key});
+
+  final MonitorController controller = Get.put(MonitorController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFF5F6FA),
+      backgroundColor: const Color(0xFFF5F6FA),
 
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
 
-              // 🔥 HEADER
+            children: [
+              // ======================
+              // HEADER
+              // ======================
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
                 children: [
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
+
                     children: [
-                      Text("KonveksiCerdas",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18)),
-                      Text("Manajemen Produksi",
-                          style: TextStyle(color: Colors.grey)),
+                      const Text(
+                        "KonveksiCerdas",
+
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+
+                          fontSize: 20,
+                        ),
+                      ),
+
+                      const SizedBox(height: 5),
+
+                      const Text(
+                        "Manajemen Produksi",
+
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ],
                   ),
+
                   Row(
                     children: [
-                      Icon(Icons.notifications_none),
-                      SizedBox(width: 10),
+                      const Icon(Icons.notifications_none),
+
+                      const SizedBox(width: 10),
+
                       CircleAvatar(
-                        backgroundColor: Color(0xFF5B5FEF),
-                        child: Text("BU"),
-                      )
+                        backgroundColor: const Color(0xFF5B5FEF),
+
+                        child: const Text("BU"),
+                      ),
                     ],
-                  )
+                  ),
                 ],
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              // 🔥 ALERT CARD
+              // ======================
+              // ALERT CARD
+              // ======================
               Container(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
+
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
+                  gradient: const LinearGradient(
                     colors: [Colors.orange, Colors.deepOrange],
                   ),
+
                   borderRadius: BorderRadius.circular(15),
                 ),
+
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
+
                       children: [
-                        Text("KRITIS : STOK MENIPIS",
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold)),
-                        Text("Segera lakukan restock",
-                            style: TextStyle(color: Colors.white70)),
+                        const Text(
+                          "KRITIS : STOK MENIPIS",
+
+                          style: TextStyle(
+                            color: Colors.white,
+
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+
+                        const SizedBox(height: 5),
+
+                        const Text(
+                          "Segera lakukan restock",
+
+                          style: TextStyle(color: Colors.white70),
+                        ),
                       ],
                     ),
+
                     ElevatedButton(
                       onPressed: () {},
-                      child: Text("PESAN"),
-                    )
+
+                      child: const Text("PESAN"),
+                    ),
                   ],
                 ),
               ),
 
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              // 🔥 GRID
-              Row(
-                children: [
-                  Expanded(child: statCard("3", "Pesanan Aktif")),
-                  SizedBox(width: 10),
-                  Expanded(child: statCard("1", "Stok Menipis")),
-                ],
+              // ======================
+              // DASHBOARD REALTIME
+              // ======================
+              Obx(() {
+                // LOADING
+                if (controller.isLoading.value) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                // EMPTY
+                if (controller.dashboard.value == null) {
+                  return const Center(child: Text("Tidak ada data"));
+                }
+
+                final data = controller.dashboard.value!;
+
+                return Column(
+                  children: [
+                    // ======================
+                    // ROW 1
+                    // ======================
+                    Row(
+                      children: [
+                        Expanded(
+                          child: statCard(
+                            data.totalOrder.toString(),
+
+                            "Total Order",
+                          ),
+                        ),
+
+                        const SizedBox(width: 10),
+
+                        Expanded(
+                          child: statCard(data.pending.toString(), "Pending"),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // ======================
+                    // ROW 2
+                    // ======================
+                    Row(
+                      children: [
+                        Expanded(
+                          child: statCard(data.sewing.toString(), "Sewing"),
+                        ),
+
+                        const SizedBox(width: 10),
+
+                        Expanded(
+                          child: statCard(data.printing.toString(), "Printing"),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    // ======================
+                    // ROW 3
+                    // ======================
+                    Row(
+                      children: [
+                        Expanded(child: statCard(data.done.toString(), "Done")),
+                      ],
+                    ),
+                  ],
+                );
+              }),
+
+              const SizedBox(height: 20),
+
+              // ======================
+              // LIST PESANAN
+              // ======================
+              const Text(
+                "Pesanan Terbaru",
+
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
               ),
 
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
 
-              Row(
-                children: [
-                  Expanded(child: statCard("Rp 20000K", "Estimasi Omzet")),
-                  SizedBox(width: 10),
-                  Expanded(child: statCard("2", "Deadline Dekat")),
-                ],
-              ),
+              Obx(() {
+                return Column(
+                  children: controller.latestOrders.map((order) {
+                    return orderCard(
+                      order.namaCustomer,
 
-              SizedBox(height: 20),
+                      order.status.toUpperCase(),
+                    );
+                  }).toList(),
+                );
+              }),
 
-              // 🔥 LIST PESANAN
-              Text("Pesanan Terbaru",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-
-              SizedBox(height: 10),
-
-              orderCard("Komunitas Sepeda", "Printing"),
-              orderCard("PT Maju Jaya", "Pending"),
-              orderCard("SMA Negeri 1", "Sewing"),
-
-              SizedBox(height: 20),
-
-              // 🔥 AI CARD
+              // ======================
+              // AI CARD
+              // ======================
               Container(
-                padding: EdgeInsets.all(20),
+                padding: const EdgeInsets.all(20),
+
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Color(0xFF5B5FEF),
-                      Color(0xFF7C3AED)
-                    ],
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF5B5FEF), Color(0xFF7C3AED)],
                   ),
+
                   borderRadius: BorderRadius.circular(20),
                 ),
+
                 child: Column(
                   children: [
-                    Text("ASISTEN AI",
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold)),
-                    SizedBox(height: 10),
-                    Text(
+                    const Text(
+                      "ASISTEN AI",
+
+                      style: TextStyle(
+                        color: Colors.white,
+
+                        fontWeight: FontWeight.bold,
+
+                        fontSize: 18,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    const Text(
                       "Prediksi menunjukkan peningkatan permintaan dalam 7 hari ke depan.",
+
                       style: TextStyle(color: Colors.white70),
+
                       textAlign: TextAlign.center,
                     ),
-                    SizedBox(height: 15),
+
+                    const SizedBox(height: 15),
+
                     ElevatedButton(
                       onPressed: () {},
+
                       style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.white),
-                      child: Text("Lihat Analisis"),
-                    )
+                        backgroundColor: Colors.white,
+                      ),
+
+                      child: const Text("Lihat Analisis"),
+                    ),
                   ],
                 ),
-              )
+              ),
             ],
           ),
         ),
@@ -151,45 +279,69 @@ class MonitorView extends GetView<MonitorController> {
     );
   }
 
+  // ======================
+  // STAT CARD
+  // ======================
+
   Widget statCard(String value, String label) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
         color: Colors.white,
+
         borderRadius: BorderRadius.circular(15),
       ),
+
       child: Column(
         children: [
-          Text(value,
-              style: TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 18)),
-          SizedBox(height: 5),
-          Text(label, style: TextStyle(color: Colors.grey))
+          Text(
+            value,
+
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+          ),
+
+          const SizedBox(height: 5),
+
+          Text(label, style: const TextStyle(color: Colors.grey)),
         ],
       ),
     );
   }
 
+  // ======================
+  // ORDER CARD
+  // ======================
+
   Widget orderCard(String title, String status) {
     return Container(
-      margin: EdgeInsets.only(bottom: 10),
-      padding: EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 10),
+
+      padding: const EdgeInsets.all(16),
+
       decoration: BoxDecoration(
         color: Colors.white,
+
         borderRadius: BorderRadius.circular(15),
       ),
+
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
         children: [
           Text(title),
+
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+
             decoration: BoxDecoration(
               color: Colors.blue.withOpacity(0.2),
+
               borderRadius: BorderRadius.circular(10),
             ),
+
             child: Text(status),
-          )
+          ),
         ],
       ),
     );
